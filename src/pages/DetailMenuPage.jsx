@@ -28,7 +28,7 @@ export default function DetailMenuPage() {
         <p className="text-gray-600 text-2xl py-2">{detailMenu.description}</p>
         <img src={detailMenu.imageUrl} className="w-96" alt={detailMenu.name} />
         <p className="font-bold text-2xl py-2">
-          Harga: {detailMenu.priceFormatted}
+          Price: {detailMenu.priceFormatted}
         </p>
         <Button onClick={() => navigate("/menu")}>Back</Button>
       </Card>
