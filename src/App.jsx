@@ -8,7 +8,7 @@ import RegisterPage from "./pages/RegisterPage";
 import MenuPage from "./pages/MenuPage";
 import DetailMenuPage from "./pages/DetailMenuPage";
 import HomePage from "./pages/HomePage";
-import ProtectedRoute from "./route/ProtectedRoute";
+import ProtectedRoute from "./routes/ProtectedRoute";
 
 export default function App() {
   return (
