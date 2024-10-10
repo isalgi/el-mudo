@@ -62,7 +62,6 @@ export default function LoginPage() {
             <TextInput
               id="username"
               type="text"
-              placeholder="Username"
               onChange={handleUsername}
               required
             />

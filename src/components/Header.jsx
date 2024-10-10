@@ -32,7 +32,7 @@ export default function Header() {
           {localStorage.getItem("access_token") ? (
             <Button onClick={handleLogout}>Logout</Button>
           ) : (
-            <Button href="/login">Login</Button>
+            <Button onClick={() => navigate("/login")}>Login</Button>
           )}
         </div>
       </Navbar>
