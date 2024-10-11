@@ -17,6 +17,7 @@ export default function MenuPage() {
   const [deleteError, setDeleteError] = useState("");
   const [updateSuccess, setUpdateSuccess] = useState("");
   const [updateError, setUpdateError] = useState("");
+  const [createError, setCreateError] = useState("");
   const [updateMenu, setUpdateMenu] = useState({
     id: null,
     name: "",
@@ -24,7 +25,14 @@ export default function MenuPage() {
     imageUrl: "",
     price: 0,
   });
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [newMenu, setNewMenu] = useState({
+    name: "",
+    description: "",
+    imageUrl: "",
+    price: 0,
+  });
 
   const navigate = useNavigate();
 
@@ -92,7 +100,27 @@ export default function MenuPage() {
 
   const openUpdateModal = (menu) => {
     setUpdateMenu(menu); // Load the selected menu's data
-    setIsModalOpen(true);
+    setIsUpdateModalOpen(true);
+  };
+
+  const handleCreate = () => {
+    const token = localStorage.getItem("access_token");
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+    axios
+      .post("https://api.mudoapi.site/menu", newMenu, config)
+      .then((res) => {
+        console.log(res);
+        setUpdateSuccess("Menu created successfully");
+        setIsCreateModalOpen(false); // Close modal after success
+        getMenusList(); // Refresh menu list
+      })
+      .catch((err) => {
+        setCreateError(err.response.data.message);
+      });
   };
 
   const handleUpdate = () => {
@@ -107,7 +135,7 @@ export default function MenuPage() {
       .then((res) => {
         console.log(res);
         setUpdateSuccess("Menu updated successfully");
-        setIsModalOpen(false); // Close modal after success
+        setIsUpdateModalOpen(false); // Close modal after success
         getMenusList(); // Refresh menu list
       })
       .catch((err) => {
@@ -119,6 +147,7 @@ export default function MenuPage() {
     <div>
       <Header />
 
+      {/* Pagination Controls */}
       <div className="flex items-center justify-center bg-center gap-2 bg-slate-800 pt-12">
         <Button disabled={pagination.page === 1} onClick={handleBack}>
           Back
@@ -127,7 +156,9 @@ export default function MenuPage() {
           Next
         </Button>
       </div>
-      <div className="flex items-center justify-center bg-center bg-slate-800 pt-2">
+
+      {/* Success/Error Messages */}
+      <div className="flex flex-col items-center justify-center bg-center bg-slate-800 pt-2">
         {deleteSuccess && (
           <p className="text-green-500 font-bold text-3xl">{deleteSuccess}</p>
         )}
@@ -140,9 +171,13 @@ export default function MenuPage() {
         {updateError && (
           <p className="text-red-500 font-bold text-3xl">{updateError}</p>
         )}
+        {createError && (
+          <p className="text-red-500 font-bold text-3xl">{createError}</p>
+        )}
         <h1 className="text-3xl font-bold text-white mt-4">List of Menus</h1>
       </div>
 
+      {/* Menu List */}
       <div className="p-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 bg-slate-800 gap-6">
         {menus.map((item) => (
           <div key={item.id} className="p-10 flex">
@@ -171,8 +206,89 @@ export default function MenuPage() {
         ))}
       </div>
 
+      {/* Create Menu Button */}
+      <div className="flex justify-center pt-6">
+        <Button onClick={() => setIsCreateModalOpen(true)} color="primary">
+          Create New Menu
+        </Button>
+      </div>
+
+      {/* Create Modal */}
+      <Modal
+        show={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+      >
+        <Modal.Header>Create Menu</Modal.Header>
+        <Modal.Body>
+          <div className="gap-6">
+            <div>
+              <Label htmlFor="name" value="Name" />
+              <TextInput
+                id="name"
+                value={newMenu.name}
+                onChange={(e) =>
+                  setNewMenu((prevState) => ({
+                    ...prevState,
+                    name: e.target.value,
+                  }))
+                }
+              />
+            </div>
+            <div>
+              <Label htmlFor="description" value="Description" />
+              <TextInput
+                id="description"
+                value={newMenu.description}
+                onChange={(e) =>
+                  setNewMenu((prevState) => ({
+                    ...prevState,
+                    description: e.target.value,
+                  }))
+                }
+              />
+            </div>
+            <div>
+              <Label htmlFor="imageUrl" value="Image URL" />
+              <TextInput
+                id="imageUrl"
+                value={newMenu.imageUrl}
+                onChange={(e) =>
+                  setNewMenu((prevState) => ({
+                    ...prevState,
+                    imageUrl: e.target.value,
+                  }))
+                }
+              />
+            </div>
+            <div>
+              <Label htmlFor="price" value="Price" />
+              <TextInput
+                id="price"
+                type="number"
+                value={newMenu.price}
+                onChange={(e) =>
+                  setNewMenu((prevState) => ({
+                    ...prevState,
+                    price: e.target.value,
+                  }))
+                }
+              />
+            </div>
+          </div>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button onClick={handleCreate}>Create</Button>
+          <Button color="gray" onClick={() => setIsCreateModalOpen(false)}>
+            Cancel
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
       {/* Update Modal */}
-      <Modal show={isModalOpen} onClose={() => setIsModalOpen(false)}>
+      <Modal
+        show={isUpdateModalOpen}
+        onClose={() => setIsUpdateModalOpen(false)}
+      >
         <Modal.Header>Update Menu</Modal.Header>
         <Modal.Body>
           <div className="gap-6">
@@ -233,7 +349,7 @@ export default function MenuPage() {
         </Modal.Body>
         <Modal.Footer>
           <Button onClick={handleUpdate}>Update</Button>
-          <Button color="gray" onClick={() => setIsModalOpen(false)}>
+          <Button color="gray" onClick={() => setIsUpdateModalOpen(false)}>
             Cancel
           </Button>
         </Modal.Footer>
