@@ -18,6 +18,7 @@ export default function MenuPage() {
   const [updateSuccess, setUpdateSuccess] = useState("");
   const [updateError, setUpdateError] = useState("");
   const [createError, setCreateError] = useState("");
+  const [priceError, setPriceError] = useState("");
   const [updateMenu, setUpdateMenu] = useState({
     id: null,
     name: "",
@@ -99,11 +100,21 @@ export default function MenuPage() {
   };
 
   const openUpdateModal = (menu) => {
-    setUpdateMenu(menu); // Load the selected menu's data
+    setUpdateMenu(menu);
     setIsUpdateModalOpen(true);
   };
 
+  const validatePrice = (price) => {
+    return !isNaN(price) && price > 0;
+  };
+
   const handleCreate = () => {
+    setPriceError("");
+    if (!validatePrice(newMenu.price)) {
+      setPriceError("Please enter a valid price greater than 0");
+      return;
+    }
+
     const token = localStorage.getItem("access_token");
     const config = {
       headers: {
@@ -115,8 +126,8 @@ export default function MenuPage() {
       .then((res) => {
         console.log(res);
         setUpdateSuccess("Menu created successfully");
-        setIsCreateModalOpen(false); // Close modal after success
-        getMenusList(); // Refresh menu list
+        setIsCreateModalOpen(false);
+        getMenusList();
       })
       .catch((err) => {
         setCreateError(err.response.data.message);
@@ -124,6 +135,12 @@ export default function MenuPage() {
   };
 
   const handleUpdate = () => {
+    setPriceError("");
+    if (!validatePrice(updateMenu.price)) {
+      setPriceError("Please enter a valid price greater than 0");
+      return;
+    }
+
     const token = localStorage.getItem("access_token");
     const config = {
       headers: {
@@ -135,8 +152,8 @@ export default function MenuPage() {
       .then((res) => {
         console.log(res);
         setUpdateSuccess("Menu updated successfully");
-        setIsUpdateModalOpen(false); // Close modal after success
-        getMenusList(); // Refresh menu list
+        setIsUpdateModalOpen(false);
+        getMenusList();
       })
       .catch((err) => {
         setUpdateError(err.response.data.message);
@@ -147,7 +164,6 @@ export default function MenuPage() {
     <div>
       <Header />
 
-      {/* Pagination Controls */}
       <div className="flex items-center justify-center bg-center gap-2 bg-slate-800 pt-12">
         <Button disabled={pagination.page === 1} onClick={handleBack}>
           Back
@@ -157,7 +173,6 @@ export default function MenuPage() {
         </Button>
       </div>
 
-      {/* Success/Error Messages */}
       <div className="flex flex-col items-center justify-center bg-center bg-slate-800 pt-2">
         {deleteSuccess && (
           <p className="text-green-500 font-bold text-3xl">{deleteSuccess}</p>
@@ -174,10 +189,12 @@ export default function MenuPage() {
         {createError && (
           <p className="text-red-500 font-bold text-3xl">{createError}</p>
         )}
+        <Button onClick={() => setIsCreateModalOpen(true)}>
+          Create New Menu
+        </Button>
         <h1 className="text-3xl font-bold text-white mt-4">List of Menus</h1>
       </div>
 
-      {/* Menu List */}
       <div className="p-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 bg-slate-800 gap-6">
         {menus.map((item) => (
           <div key={item.id} className="p-10 flex">
@@ -205,15 +222,6 @@ export default function MenuPage() {
           </div>
         ))}
       </div>
-
-      {/* Create Menu Button */}
-      <div className="flex justify-center pt-6">
-        <Button onClick={() => setIsCreateModalOpen(true)} color="primary">
-          Create New Menu
-        </Button>
-      </div>
-
-      {/* Create Modal */}
       <Modal
         show={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
@@ -269,22 +277,22 @@ export default function MenuPage() {
                 onChange={(e) =>
                   setNewMenu((prevState) => ({
                     ...prevState,
-                    price: e.target.value,
+                    price: parseFloat(e.target.value),
                   }))
                 }
               />
+              {priceError && <p className="text-red-500">{priceError}</p>}
             </div>
           </div>
         </Modal.Body>
         <Modal.Footer>
-          <Button onClick={handleCreate}>Create</Button>
           <Button color="gray" onClick={() => setIsCreateModalOpen(false)}>
-            Cancel
+            Close
           </Button>
+          <Button onClick={handleCreate}>Create</Button>
         </Modal.Footer>
       </Modal>
 
-      {/* Update Modal */}
       <Modal
         show={isUpdateModalOpen}
         onClose={() => setIsUpdateModalOpen(false)}
@@ -340,18 +348,19 @@ export default function MenuPage() {
                 onChange={(e) =>
                   setUpdateMenu((prevState) => ({
                     ...prevState,
-                    price: e.target.value,
+                    price: parseFloat(e.target.value) || 0,
                   }))
                 }
               />
+              {priceError && <p className="text-red-500">{priceError}</p>}
             </div>
           </div>
         </Modal.Body>
         <Modal.Footer>
-          <Button onClick={handleUpdate}>Update</Button>
           <Button color="gray" onClick={() => setIsUpdateModalOpen(false)}>
-            Cancel
+            Close
           </Button>
+          <Button onClick={handleUpdate}>Update</Button>
         </Modal.Footer>
       </Modal>
     </div>
